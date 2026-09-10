@@ -1,0 +1,6 @@
+torch
+streamlit
+plotly
+pandas
+numpy
+scikit-learn
