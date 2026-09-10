@@ -1,0 +1,15 @@
+# Virtual environments
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Local system/IDE files
+.DS_Store
+.vscode/
+
+# Large raw datasets (never push gigabyte CSVs to GitHub)
+*.csv
+*.pcap
+data/
+raw_data/
