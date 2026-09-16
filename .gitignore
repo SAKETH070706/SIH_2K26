@@ -1,15 +1,10 @@
-# Virtual environments
-venv/
-env/
-__pycache__/
-*.pyc
-
-# Local system/IDE files
-.DS_Store
-.vscode/
-
-# Large raw datasets (never push gigabyte CSVs to GitHub)
+# Create .gitignore in PowerShell
+@"
 *.csv
 *.pcap
-data/
-raw_data/
+*.pcapng
+_temp_*
+__pycache__/
+venv/
+.env
+"@ | Out-File -Encoding utf8 .gitignore
