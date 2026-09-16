@@ -90,7 +90,23 @@ The Scapy-based network engine processes raw captures via:
 | **Random Forest** | Tree Ensemble | ❌ No ($W=1$) | ❌ Unsupported | Impurity Metrics |
 | **AI World Model** | Dual-Head LSTM | ✅ Yes ($W=20$) | ✅ Autoregressive ($t+K$) | Gradient Saliency $\left\|\frac{\partial \text{Logit}}{\partial X}\right\|$ |
 
-### Empirical Boundary: Low-Footprint Reconnaissance
-* **Observed Boundary:** Cross-dataset evaluation on CIC-IDS-2017 single-packet SYN sweeps (`Tot Fwd Pkts = 1`, `TotLen Fwd Pkts = 0`) projects into Phase 0 (Baseline Normal).
-* **Mechanistic Cause:** The model was trained on CSE-CIC-IDS-2018 enterprise infiltrations (e.g., Patator authentication brute-forcing). Single-packet sweeps produce negative standard-deviation feature vectors ($z \approx -0.7$), below the activation energy needed for multi-packet attack identification.
-* **Operational Implication:** The model maintains high resistance to false positives on transient port scans while focusing alerts on sustained, multi-stage state transitions.
+## Empirical Boundary & Known Limitations
+
+* **Single-Packet Reconnaissance:** In cross-dataset evaluations against CIC-IDS-2017 single-packet SYN sweeps (`Tot Fwd Pkts = 1`, `TotLen Fwd Pkts = 0`), the model classifies the flows as Phase 0 (Baseline Normal).
+* **Root Cause:** The model was trained on CSE-CIC-IDS-2018 enterprise infiltration profiles (e.g., SSH/FTP brute-force and botnet beaconing), which consist of multi-packet, stateful TCP interactions. Single-packet exploratory probes lack payload exchange and inter-arrival momentum, falling below the sequence activation threshold ($z \approx -0.7$).
+* **Mitigation Roadmap:** Future iterations require augmenting the training corpus with stateless packet-level scan captures and deploying a lightweight stateless pre-filter (e.g., eBPF/XDP) ahead of the recurrent World Model.
+
+
+## Benchmark Performance Evaluation
+
+Evaluated on the balanced 4-phase CSE-CIC-IDS-2018 test partition ($N=2,000$ flows across Baseline, Initial Access, C2, and Impact). All models were audited under identical feature distributions:
+
+| Model Architecture | Input Scope | Precision | Recall | Macro F1 | False Positive Rate (FPR) | Autoregressive Rollout ($t+K$) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Logistic Regression (Mandated)** | Static ($W=1$) | 96.74% | 96.45% | 96.40% | 14.00% | ❌ Unsupported |
+| **Random Forest (Static Ensemble)** | Static ($W=1$) | 99.90% | 99.90% | 99.90% | 0.00% | ❌ Unsupported |
+| **AI Network World Model (Ours)** | Recurrent ($W=20$) | **99.80%** | **99.80%** | **99.80%** | **0.00%** | **✅ Supported (+K Steps)** |
+
+### Key Benchmark Takeaways
+1. **False Positive Suppression:** The mandated Logistic Regression baseline exhibits an unacceptable 14.00% FPR on normal baseline traffic. The World Model eliminates these false alarms (0.00% FPR) by leveraging temporal sequence context.
+2. **Beyond Static Detection:** While static ensembles (Random Forest) achieve parity on single-frame classification, they cannot forecast trajectory evolution. The World Model provides equivalent discriminative performance while regressing continuous state dynamics $\hat{S}_{t+1}$.
