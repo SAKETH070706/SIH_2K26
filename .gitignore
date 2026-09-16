@@ -1,5 +1,4 @@
-# Create .gitignore in PowerShell
-@"
+cat << 'EOF' > .gitignore
 *.csv
 *.pcap
 *.pcapng
@@ -7,4 +6,4 @@ _temp_*
 __pycache__/
 venv/
 .env
-"@ | Out-File -Encoding utf8 .gitignore
+EOF
