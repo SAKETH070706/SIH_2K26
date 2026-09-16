@@ -1,4 +1,4 @@
-cat << 'EOF' > .gitignore
+
 *.csv
 *.pcap
 *.pcapng
@@ -6,4 +6,4 @@ _temp_*
 __pycache__/
 venv/
 .env
-EOF
+s
